@@ -19,9 +19,9 @@ public class WebServer {
        from web clients */
     private static ServerSocket dServerSocket; //Class variable, from java.net
 
-    private String logFile = "serverLog.log";
+    private String logFile = "serverLog.log"; //Class variable, this is the file to save log to
 
-    private static final int PORT = 8080;
+    private static final int PORT = 8080; //Class variable, port to connect to
 
 
 // Second, declare class methods
@@ -138,30 +138,30 @@ public class WebServer {
     }
 
     public void storeFile(BufferedReader br, OutputStreamWriter osw, String pathname) throws Exception {
-        FileWriter fw = null;
+        FileWriter fw = null; //declare a java.io filewriter object as null to be used later
         try {
-            fw = new FileWriter (pathname);
-            String s = br.readLine();
-            while (s != null) {
-                fw.write (s);
-                s = br.readLine();
+            fw = new FileWriter (pathname); //try to make a new filewriter for the specifed pathname
+            String s = br.readLine(); //read the input line and set it to s
+            while (s != null) { //while s still can read input 
+                fw.write (s); //write s to the file
+                s = br.readLine(); //read the next line
             }
-            fw.close();
-            osw.write ("HTTP/1.0 201 Created");
+            fw.close(); //close the filewriter
+            osw.write ("HTTP/1.0 201 Created"); //success
         }
         catch (Exception e) {
-            osw.write ("HTTP/1.0 500 Internal Server Error");
+            osw.write ("HTTP/1.0 500 Internal Server Error"); //failure
         }
     }
 
-    public void logEntry(String filename,String record) throws IOException {
-        FileWriter fw = new FileWriter (filename, true);
-        fw.write (getTimestamp() + " " + record + "\r\n");
-        fw.close();
+    public void logEntry(String filename,String record) throws IOException { //throws an error if can't write
+        FileWriter fw = new FileWriter (filename, true); //new local variable to write to log file
+        fw.write (getTimestamp() + " " + record + "\r\n"); //write the time and what happened with a newline character
+        fw.close(); //close the filewriter
     }
 
     public String getTimestamp() {
-        return (new Date()).toString();
+        return (new Date()).toString(); //get current date from server 
     }
 
 
