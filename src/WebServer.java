@@ -1,13 +1,9 @@
 /***********************************************************************
-
  SimpleWebServer.java
-
  Curtis P. Hohl
  9/22/2018
-
  This toy web server is used to illustrate security vulnerabilities.
  This web server only supports extremely simple HTTP GET requests.
-
  ***********************************************************************/
 
 import java.io.*;
@@ -22,6 +18,10 @@ public class WebServer {
     /* The socket used to process incoming connections
        from web clients */
     private static ServerSocket dServerSocket; //Class variable, from java.net
+
+    private String logFile = "serverLog.log";
+
+    private static final int PORT = 8080;
 
 
 // Second, declare class methods
@@ -38,7 +38,7 @@ public class WebServer {
             Socket s = dServerSocket.accept(); //From java.net
 
             /* then process the client's request */
-            processRequest(s); //Should be an HTTP request
+                processRequest(s); //Should be an HTTP request
         }
     }
 
@@ -74,12 +74,22 @@ public class WebServer {
        /* if the request is a GET
          try to respond with the file
          the user is requesting */
+            logEntry(logFile, "GET Request: " + pathname);
             serveFile (osw, pathname); //call the serveFile method, passing the OutputStreamWriter and the user's requested pathname
         }
+        else if (command.equals("PUT")){
+       /* if the request is a PUT
+         try to store file
+         the user is requesting */
+            logEntry(logFile, "PUT Request: " + pathname);
+            storeFile(br, osw, pathname);
+        }
+
         else {
        /* if the request is a NOT a GET,
          return an error saying this server
          does not implement the requested command */
+            logEntry(logFile, "HTTP/1.0 501 Not Implemented");
             osw.write ("HTTP/1.0 501 Not Implemented\n\n");
         }
 
@@ -127,6 +137,34 @@ public class WebServer {
         osw.write (sb.toString()); //write the file contents from the StringBuffer
     }
 
+    public void storeFile(BufferedReader br, OutputStreamWriter osw, String pathname) throws Exception {
+        FileWriter fw = null;
+        try {
+            fw = new FileWriter (pathname);
+            String s = br.readLine();
+            while (s != null) {
+                fw.write (s);
+                s = br.readLine();
+            }
+            fw.close();
+            osw.write ("HTTP/1.0 201 Created");
+        }
+        catch (Exception e) {
+            osw.write ("HTTP/1.0 500 Internal Server Error");
+        }
+    }
+
+    public void logEntry(String filename,String record) throws IOException {
+        FileWriter fw = new FileWriter (filename, true);
+        fw.write (getTimestamp() + " " + record + "\r\n");
+        fw.close();
+    }
+
+    public String getTimestamp() {
+        return (new Date()).toString();
+    }
+
+
     /* This method is called when the program is run from
       the command line. */
     public static void main (String argv[]) throws Exception {
@@ -136,4 +174,3 @@ public class WebServer {
         sws.run(); //Starts the sws web server.
     }
 }
-
